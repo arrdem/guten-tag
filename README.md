@@ -1,6 +1,6 @@
 # Guten tag
 
-> Good tags or good day, whichever!
+> Good tags for a good day!
 
 [![Clojars Project](http://clojars.org/me.arrdem/guten-tag/latest-version.svg)](http://clojars.org/me.arrdem/guten-tag)
 
