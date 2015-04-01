@@ -20,11 +20,14 @@
       (1)      (.v self)
       o))
 
+  clojure.lang.Sequential
   clojure.lang.ISeq
   (next [this]
     (seq this))
   (first [this]
     (.t this))
+  (more [this]
+    (.more (seq this)))
   (count [this]
     2)
   (equiv [this obj]
