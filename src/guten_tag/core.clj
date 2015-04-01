@@ -152,6 +152,12 @@
   "Tag describing the tag of other things! so this is the tag tag :-P"
   [attrs members tag])
 
-(defn read-tagged-val [a]
+(defn read-tagged-val
+  "Wrapper function around ->ATaggedVal which serves as the tagged value ctor."
+  [[tag val :as a]]
+  {:pre [(vector? a)
+         (keyword? tag)
+         (map? val)
+         (every? keyword? (keys val))]}
   (let [[tag val] (eval a)]
     (->ATaggedVal tag val)))
