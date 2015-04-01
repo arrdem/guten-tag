@@ -4,6 +4,31 @@
 
 [![Clojars Project](http://clojars.org/me.arrdem/guten-tag/latest-version.svg)](http://clojars.org/me.arrdem/guten-tag)
 
+## Demo
+
+```Clojure
+user> (require '[guten-tag.core :as t])
+nil
+user> (t/deftag foo [bar])
+nil
+user> (->foo 3)
+#guten/tag [:user/foo {:bar 3}]
+user> (def base-foo *1)
+#'user/base-foo
+user> (t/tag base-foo)
+:user/foo
+user> (t/val base-foo)
+{:bar 3}
+user> (foo? base-foo)
+true
+user> (assoc base-foo :foo 'bar)
+#guten/tag [:user/foo {:bar 3, :foo bar}]
+user> (seq *1)
+(:user/foo {:bar 3 :foo bar})
+```
+
+## Motivation
+
 Types are really cool.
 They allow you to express limitations on the code you've written and reason about what could possibly work.
 Most of all, they can help you reason about what you _want_ to work.
@@ -20,9 +45,8 @@ typedef struct {
 } person;
 ```
 
-Which is awful for all the usual reasons that go with manual memory management, but critically the structure encodes no information about exactly what it is.
-If you throw me a `void*`, I have no way to figure out exactly what data you gave me.
-The real fun of C is that I can just type cast it away and do whatever the heck I want with an arbitrary integer but we're talking Clojure not C here.
+Which is awful for all the usual reasons that go with manual memory management, but critically the structure encodes no information about exactly what it is and isn't open to extension.
+It isn't actually associative at all.
 
 In comparison, the Clojure idiom would be to write the following structure:
 
@@ -33,7 +57,7 @@ In comparison, the Clojure idiom would be to write the following structure:
  :employer   ""}
 ```
 
-Which is great for many reasons, but as jneen argued in her talk, it has issues with validation, nils can slip in, and the type key is advisory.
+Which is great for many reasons being associative, extensible and immutable, but as jneen argued in her talk, it has issues with validation, nils can slip in, and the type key is advisory.
 To paraphrase a 40 minute talk, the above map represents the sum of a type name and a bunch of data.
 What we really want is the product of a type name and a bunch of data so that the type clearly identifies the data and can't get lost.
 The pattern that jneen points to is to use one of the following:
@@ -76,16 +100,7 @@ It also means that `clojure.core/assoc` and `clojure.core/update` will "just wor
 The interface `guten_tag.core.ITaggedVal` exists to provide the `-tag` and `-val` methods, wrapped in true ClojureScript style in the `tag` and `val` fns.
 The predicate `tagged?` is also provided.
 
-Reader/printer notation for tagged values is provided:
-
-```Clojure
-user> (require '[guten-tag.core :as t])
-nil
-user> (t/deftag foo [bar])
-nil
-user> (->foo 3)
-#guten/tag [:user/foo {:bar 3}]
-```
+Reader/printer notation for tagged values is provided.
 
 The `deftag` macro is a little special in that as of this writing it does three things:
 
@@ -107,7 +122,6 @@ Like `defn`, `deftag` supports `:pre` and `:post` in the attrs map.
 Preconditions and postconditions in the attrs map will be applied both to the generated predicate and to the generated constructor.
 The `:pre` capabilities of `deftag` can be used to emulate [smart constructors](https://wiki.haskell.org/Smart_constructors).
 This pattern worked very well for me [in lib-grimoire](https://github.com/clojure-grimoire/lib-grimoire/blob/master/src/grimoire/things.clj#L23-L90) and I highly recommend it as a mechanism for enforcing ongoing data sanity checks.
-
 
 ## License
 
