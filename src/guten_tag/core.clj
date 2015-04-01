@@ -8,9 +8,9 @@
 (deftype ATaggedVal [t v]
   ITaggedVal
   (-tag [self]
-    (.t self))
+    t)
   (-val [self]
-    (.v self))
+    v)
 
   clojure.lang.Indexed
   (nth [self i] (nth self i nil))
@@ -21,10 +21,14 @@
       o))
 
   clojure.lang.ISeq
-  (next [this] (seq this))
-  (first [this] (.t this))
-  (count [this] 2)
-  (equiv [this obj] (= (seq this) (seq obj)))
+  (next [this]
+    (seq this))
+  (first [this]
+    (.t this))
+  (count [this]
+    2)
+  (equiv [this obj]
+    (= (seq this) (seq obj)))
   (seq [self]
     (cons (.t self)
           (cons (.v self)
@@ -34,6 +38,7 @@
   (entryAt [self key]
     (.entryAt (.v self) key))
   (assoc [self k v]
+    (assert (keyword? k))
     (ATaggedVal. (.t self)
                  (.assoc (.v self) k v)))
 
@@ -51,9 +56,10 @@
   not. Returns true if and only if the argument is all of #{ITaggedVal, Indexed,
   ISeq}."
   [x]
-  (and (satisfies? ITaggedVal x)
-       (instance?  clojure.lang.Indexed x)
-       (instance?  clojure.lang.ISeq x)))
+  (and (instance? guten_tag.core.ITaggedVal x)
+       (instance? clojure.lang.Indexed x)
+       (instance? clojure.lang.ISeq x)
+       (instance? clojure.lang.Associative x)))
 
 (defn tag
   "Returns the tag on a tagged value, returning nil if the value is not tagged."
