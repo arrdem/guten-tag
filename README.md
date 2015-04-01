@@ -27,25 +27,29 @@ user> (seq *1)
 (:user/foo {:bar 3 :foo bar})
 ```
 
-support for core.match is provided as a sequence type:
+support for [core.match](https://github.com/clojure/core.match) is provided as a sequence type:
 
 ```Clojure
 user> (require '[clojure.core.match :refer [match]])
 nil
 user> (require '[guten-tag.core :as t])
 nil
-user> (t/deftag person [name email phone])
+user> (t/deftag person [name email phone]) ;; people are chill
 nil
-user> (t/deftag dog [name owner])
+user> (t/deftag dog [name owner breed]) ;; dogs are awesome
 nil
-user> (match [(->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ")]
-             [([::person {:name name}] :seq)] name
-             [([::dog {:owner owner}] :seq)] owner)
+user> (defn f [t]
+        (match [t]
+               [([::person {:name name}] :seq)]  name    ;; who?
+               [([::dog {:breed "boxer"}] :seq)] "<3"    ;; I DON'T CARE WHO YAAS
+               [([::dog {:owner owner}] :seq)]   owner)) ;; who?
+#'user/f
+user> (f (->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ"))
 "reid"
-user> (match [(->dog "papu" "callen")]
-             [([::person {:name name}] :seq)] name
-             [([::dog {:owner owner}] :seq)] owner)
+user> (f (->dog "papu" "callen" "mix"))
 "callen"
+user> (f (->dog "tina" "reid" "boxer"))
+"<3"
 ```
 
 ## Motivation
