@@ -114,6 +114,7 @@ It provides the following interfaces
 
  - `clojure.lang.ILookup`
  - `clojure.lang.Associative`
+ - `clojure.lang.Sequential`
  - `clojure.lang.ISeq`
  - `clojure.lang.Indexed`
 
