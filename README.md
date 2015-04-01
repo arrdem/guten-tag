@@ -27,6 +27,27 @@ user> (seq *1)
 (:user/foo {:bar 3 :foo bar})
 ```
 
+support for core.match is provided as a sequence type:
+
+```Clojure
+user> (require '[clojure.core.match :refer [match]])
+nil
+user> (require '[guten-tag.core :as t])
+nil
+user> (t/deftag person [name email phone])
+nil
+user> (t/deftag dog [name owner])
+nil
+user> (match [(->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ")]
+             [([::person {:name name}] :seq)] name
+             [([::dog {:owner owner}] :seq)] owner)
+"reid"
+user> (match [(->dog "papu" "callen")]
+             [([::person {:name name}] :seq)] name
+             [([::dog {:owner owner}] :seq)] owner)
+"callen"
+```
+
 ## Motivation
 
 Types are really cool.
