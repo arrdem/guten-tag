@@ -16,40 +16,42 @@
   (nth [self i] (nth self i nil))
   (nth [self i o]
     (case i
-      (0)      (.t self)
-      (1)      (.v self)
+      (0) t
+      (1) v
       o))
 
   clojure.lang.Sequential
   clojure.lang.ISeq
-  (next [this]
+  (next  [this]
     (seq this))
   (first [this]
-    (.t this))
-  (more [this]
+    t)
+  (more  [this]
     (.more (seq this)))
   (count [this]
     2)
   (equiv [this obj]
     (= (seq this) obj))
   (seq [self]
-    (cons (.t self)
-          (cons (.v self)
-                nil)))
+    (cons t (cons v nil)))
 
   clojure.lang.Associative
   (entryAt [self key]
-    (.entryAt (.v self) key))
-  (assoc [self k v]
-    (assert (keyword? k))
-    (ATaggedVal. (.t self)
-                 (.assoc (.v self) k v)))
+    (.entryAt v key))
+  (assoc [_ sk sv]
+    (ATaggedVal. t (.assoc v sk sv)))
 
   clojure.lang.ILookup
   (valAt [self k]
-    (.valAt (.v self) k))
+    (.valAt v k))
   (valAt [self k o]
-    (.valAt (.v self) k o)))
+    (.valAt v k o))
+
+  clojure.lang.IPersistentMap
+  (assocEx [_ sk sv]
+    (ATaggedVal. t (.assocEx v sk sv)))
+  (without [_ sk]
+    (ATaggedVal. t (.without v sk))))
 
 (defmethod print-method ATaggedVal [v ^java.io.Writer w]
   (.write w (format "#guten/tag %s" (vec (seq v)))))
