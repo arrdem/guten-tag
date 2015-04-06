@@ -31,7 +31,7 @@
   (count [this]
     2)
   (equiv [this obj]
-    (= (seq this) (seq obj)))
+    (= (seq this) obj))
   (seq [self]
     (cons (.t self)
           (cons (.v self)
