@@ -54,7 +54,7 @@
     (ATaggedVal. t (.without v sk))))
 
 (defmethod print-method ATaggedVal [v ^java.io.Writer w]
-  (.write w (format "#guten/tag %s" (vec (seq v)))))
+  (.write w (format "〈%s %s〉" (-tag v) (-val v))))
 
 (defn tagged?
   "Predicate indicating whether the argument value is a tagged value or
@@ -102,7 +102,7 @@
   {:pre [(number? a) (vector? b)]})
   nil
   user> (->test 1 [1])
-  (:user/test {:a 1 :b [1]})
+  〈:user/test {:a 1 :b [1]}〉
   user> (test? (->test 1 [1]))
   true
   user> (tagged? (->test 1 [1]))
@@ -125,7 +125,8 @@
 
         ;; Build used datastructures
         kw-members        (mapv (comp keyword name) members)
-        kw-tag            (keyword (name (ns-name *ns*))
+        kw-tag            (keyword (or (namespace vname)
+                                       (name (ns-name *ns*)))
                                    (name vname))
         ?attr-map         (merge {}
                                  ?attr-map
@@ -139,7 +140,7 @@
            ~members
            ~?pre-map
            (->ATaggedVal ~kw-tag (hash-map ~@(interleave kw-members members))))
-         (def ~(with-meta vname
+         (def ~(with-meta (symbol (name vname))
                  (select-keys ?pre-map [:private]))
            ~?docstring
            (guten-tag.core/->TagDescriptor
