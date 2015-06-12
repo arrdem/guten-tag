@@ -1,4 +1,4 @@
-(defproject me.arrdem/guten-tag "0.1.0"
+(defproject me.arrdem/guten-tag "0.1.1"
   :description "Good tags for a good day!"
   :url "http://github.com/arrdem/guten-tag"
   :license {:name "Eclipse Public License"
