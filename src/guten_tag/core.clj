@@ -1,11 +1,12 @@
 (ns guten-tag.core
-  (:refer-clojure :exclude [val]))
+  (:refer-clojure :exclude [val])
+  (:require [clojure.set :as set]))
 
 (defprotocol ITaggedVal
   (-tag [_])
   (-val [_]))
 
-(deftype ATaggedVal [t v]
+(deftype ATaggedVal [t v guards]
   ITaggedVal
   (-tag [self]
     t)
@@ -13,7 +14,8 @@
     v)
 
   clojure.lang.Indexed
-  (nth [self i] (nth self i nil))
+  (nth [self i]
+    (nth self i nil))
   (nth [self i o]
     (case i
       (0) t
@@ -39,7 +41,11 @@
   (entryAt [self key]
     (.entryAt v key))
   (assoc [_ sk sv]
-    (ATaggedVal. t (.assoc v sk sv)))
+    (let [v'    (.assoc v sk sv)
+          preds (get guards sk)]
+      (doseq [p preds]
+        (assert (p v')))
+      (ATaggedVal. t v' guards)))
 
   clojure.lang.ILookup
   (valAt [self k]
@@ -49,9 +55,17 @@
 
   clojure.lang.IPersistentMap
   (assocEx [_ sk sv]
-    (ATaggedVal. t (.assocEx v sk sv)))
+    (let [v'    (.assocEx v sk sv)
+          preds (get guards sk)]
+      (doseq [p preds]
+        (assert (p v')))
+      (ATaggedVal. t v' guards)))
   (without [_ sk]
-    (ATaggedVal. t (.without v sk))))
+    (let [v'    (.without v sk)
+          preds (get guards sk)]
+      (doseq [p preds]
+        (assert (p v')))
+      (ATaggedVal. t v' guards))))
 
 (def ^:dynamic *concise-printing*
   true)
@@ -124,13 +138,15 @@
   [vname & args]
   (let [;; Parse direct args
         [?docstring args] (take-when string? "" args)
-        [?attr-map args]  (take-when map? {} args)
-        [members args]    (take-when vector? nil args)
-        [?pre-map args]   (take-when map? {} args)
+        [?attr-map  args] (take-when map? {} args)
+        [members    args] (take-when vector? nil args)
+        [?pre-map   args] (take-when map? {} args)
 
         ;; FIXME inline guards are a bad habit of mine
-        _                 (assert (vector? members) "Members is not a vector!")
-        _                 (assert (every? symbol? members) "Members may contain only symbols!")
+        _                 (assert (vector? members)
+                                  "Members is not a vector!")
+        _                 (assert (every? symbol? members)
+                                  "Members may contain only symbols!")
 
         ;; Build used datastructures
         kw-members        (mapv (comp keyword name) members)
@@ -141,14 +157,29 @@
                                  ?attr-map
                                  ?pre-map
                                  (when ?docstring
-                                   {:doc ?docstring}))]
+                                   {:doc ?docstring}))
+        ->guard           (fn [form]
+                            (eval
+                             `(fn [{:keys [~@members]}]
+                                ~form)))
+        guards            (->> (for [m members]
+                                 [(keyword (name m))
+                                  (for [g     (:pre ?pre-map)
+                                        :when (-> (flatten g)
+                                                  set
+                                                  (contains? m))]
+                                    (->guard g))])
+                               (into {}))]
     `(do (defn ~(with-meta
                   (symbol (str "->" (name vname)))
                   (select-keys ?pre-map [:private]))
            ~(str "Generated constructor for the " vname " type.")
            ~members
            ~?pre-map
-           (->ATaggedVal ~kw-tag (hash-map ~@(interleave kw-members members))))
+           (->ATaggedVal
+            ~kw-tag
+            (hash-map ~@(interleave kw-members members))
+            ~guards))
          (def ~(with-meta (symbol (name vname))
                  (select-keys ?pre-map [:private]))
            ~?docstring
@@ -181,4 +212,4 @@
          (map? val)
          (every? keyword? (keys val))]}
   (let [[tag val] (eval a)]
-    (->ATaggedVal tag val)))
+    (->ATaggedVal tag val nil)))
