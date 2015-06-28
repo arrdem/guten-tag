@@ -7,48 +7,57 @@
 ## Demo
 
 ```Clojure
-user> (require '[guten-tag.core :as t])
-nil
-user> (t/deftag foo [bar])
-nil
-user> (->foo 3)
-#guten/tag [:user/foo {:bar 3}]
-user> (def base-foo *1)
-#'user/base-foo
-user> (t/tag base-foo)
-:user/foo
-user> (t/val base-foo)
-{:bar 3}
-user> (foo? base-foo)
-true
-user> (assoc base-foo :foo 'bar)
-#guten/tag [:user/foo {:bar 3, :foo bar}]
-user> (seq *1)
-(:user/foo {:bar 3 :foo bar})
+(require '[guten-tag.core :as t])
+;; => nil
+
+(t/deftag foo
+  [bar])
+;; => nil
+
+(->foo 3)
+;; => #g/t [:user/foo {:bar 3}]
+
+(def base-foo *1)
+;; => #'user/base-foo
+
+(t/tag base-foo)
+;; => :user/foo
+
+(t/val base-foo)
+;; => {:bar 3}
+
+(foo? base-foo)
+;; => true
+
+(assoc base-foo :foo 'bar)
+;; => #g/t [:user/foo {:bar 3, :foo bar}]
+
+(seq *1)
+;; => (:user/foo {:bar 3 :foo bar})
 ```
 
 support for [core.match](https://github.com/clojure/core.match) is provided as a sequence type:
 
 ```Clojure
-user> (require '[clojure.core.match :refer [match]])
+ (require '[clojure.core.match :refer [match]])
 nil
-user> (require '[guten-tag.core :as t])
+ (require '[guten-tag.core :as t])
 nil
-user> (t/deftag person [name email phone]) ;; people are chill
+ (t/deftag person [name email phone]) ;; people are chill
 nil
-user> (t/deftag dog [name owner breed]) ;; dogs are awesome
+ (t/deftag dog [name owner breed]) ;; dogs are awesome
 nil
-user> (defn f [t]
+ (defn f [t]
         (match [t]
                [([::person {:name name}] :seq)]  name    ;; who?
                [([::dog {:breed "boxer"}] :seq)] "<3"    ;; I DON'T CARE WHO YAAS
                [([::dog {:owner owner}] :seq)]   owner)) ;; who?
 #'user/f
-user> (f (->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ"))
+ (f (->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ"))
 "reid"
-user> (f (->dog "papu" "callen" "mix"))
+ (f (->dog "papu" "callen" "mix"))
 "callen"
-user> (f (->dog "tina" "reid" "boxer"))
+ (f (->dog "tina" "reid" "boxer"))
 "<3"
 ```
 

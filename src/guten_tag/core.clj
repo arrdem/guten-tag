@@ -53,8 +53,17 @@
   (without [_ sk]
     (ATaggedVal. t (.without v sk))))
 
+(def ^:dynamic *concise-printing*
+  true)
+
 (defmethod print-method ATaggedVal [v ^java.io.Writer w]
-  (.write w (format "〈%s %s〉" (-tag v) (-val v))))
+  (->> (format
+        (if *concise-printing*
+          "#g/t [%s %s]"
+          "#guten/tag [%s %s]")
+        (-tag v)
+        (-val v))
+       (.write w)))
 
 (defn tagged?
   "Predicate indicating whether the argument value is a tagged value or
