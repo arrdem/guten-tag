@@ -107,19 +107,19 @@
   constructor if any.
 
   Ex.
-  user> (deftag test \"A demo variant\" [a b]
-  {:pre [(number? a) (vector? b)]})
-  nil
-  user> (->test 1 [1])
-  〈:user/test {:a 1 :b [1]}〉
-  user> (test? (->test 1 [1]))
-  true
-  user> (tagged? (->test 1 [1]))
-  true
-  user> (tag (->test 1 [1]))
-  :user/test
-  user> (val (->test 1 [1]))
-  {:a 1 b [1]}"
+  (deftag test \"A demo variant\" [a b]
+    {:pre [(number? a) (vector? b)]})
+  ;; => nil
+  (->test 1 [1])
+  ;; => #g/t [:user/test {:a 1 :b [1]}]
+  (test? (->test 1 [1]))
+  ;; => true
+  (tagged? (->test 1 [1]))
+  ;; => true
+  (tag (->test 1 [1]))
+  ;; => :user/test
+  (val (->test 1 [1]))
+  ;; => {:a 1 b [1]}"
   {:arglists '([name doc-string? attr-map? members pre-map?])}
   [vname & args]
   (let [;; Parse direct args
