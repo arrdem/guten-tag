@@ -39,26 +39,33 @@
 support for [core.match](https://github.com/clojure/core.match) is provided as a sequence type:
 
 ```Clojure
- (require '[clojure.core.match :refer [match]])
-nil
- (require '[guten-tag.core :as t])
-nil
- (t/deftag person [name email phone]) ;; people are chill
-nil
- (t/deftag dog [name owner breed]) ;; dogs are awesome
-nil
- (defn f [t]
-        (match [t]
-               [([::person {:name name}] :seq)]  name    ;; who?
-               [([::dog {:breed "boxer"}] :seq)] "<3"    ;; I DON'T CARE WHO YAAS
-               [([::dog {:owner owner}] :seq)]   owner)) ;; who?
-#'user/f
- (f (->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ"))
-"reid"
- (f (->dog "papu" "callen" "mix"))
-"callen"
- (f (->dog "tina" "reid" "boxer"))
-"<3"
+(require '[clojure.core.match :refer [match]])
+;; => nil
+
+(require '[guten-tag.core :as t])
+;; => nil
+
+(t/deftag person [name email phone]) ;; people are chill
+;; => nil
+
+(t/deftag dog [name owner breed]) ;; dogs are awesome
+;; => nil
+
+(defn f [t]
+       (match [t]
+              [([::person {:name name}] :seq)]  name    ;; who?
+              [([::dog {:breed "boxer"}] :seq)] "<3"    ;; I DON'T CARE WHO YAAS
+              [([::dog {:owner owner}] :seq)]   owner)) ;; who?
+;; => #'user/f
+
+(f (->person "reid" "me@arrdem.com" "XXX-YYY-ZZZZ"))
+;; => "reid"
+
+(f (->dog "papu" "callen" "mix"))
+;; => "callen"
+ 
+(f (->dog "tina" "reid" "boxer"))
+;; => "<3"
 ```
 
 ## Motivation
