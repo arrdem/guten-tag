@@ -149,13 +149,6 @@
            ~members
            ~?pre-map
            (->ATaggedVal ~kw-tag (hash-map ~@(interleave kw-members members))))
-         (def ~(with-meta (symbol (name vname))
-                 (select-keys ?pre-map [:private]))
-           ~?docstring
-           (guten-tag.core/->TagDescriptor
-            ,,(quote ~?attr-map)
-            ,,(quote ~kw-members)
-            ,,(quote ~kw-tag)))
          (defn ~(with-meta
                   (symbol (str (name vname) "?"))
                   (select-keys ?pre-map [:private]))
