@@ -63,7 +63,7 @@ support for [core.match](https://github.com/clojure/core.match) is provided as a
 
 (f (->dog "papu" "callen" "mix"))
 ;; => "callen"
- 
+
 (f (->dog "tina" "reid" "boxer"))
 ;; => "<3"
 ```
@@ -110,7 +110,7 @@ The pattern that jneen points to is to use one of the following:
   :employer   ""}]
 ```
 
-or 
+or
 
 ```Clojure
 [:person "" "" ""]
@@ -144,11 +144,10 @@ The predicate `tagged?` is also provided.
 
 Reader/printer notation for tagged values is provided.
 
-The `deftag` macro is a little special in that as of this writing it does three things:
+The `deftag` macro is a little special in that as of this writing it does two things:
 
  - Generate a `->T` constructor
  - Generate a `T?` predicate
- - Generate a `T` var describing the `T` tagged type as defined.
 
 The `deftag` macro is of the syntax
 
