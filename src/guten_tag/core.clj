@@ -128,6 +128,15 @@
         [members args]    (take-when vector? nil args)
         [?pre-map args]   (take-when map? {} args)
 
+        _                 (when (:post ?pre-map)
+                            (->> (for [e (:post ?pre-map)]
+                                   (str "........ " e "\n"))
+                                 (list* "Warning: deftag ignores :post, the following forms are ignored:\n")
+                                 (apply str)
+                                 print))
+
+        _                 (dissoc ?pre-map :post)
+
         ;; FIXME inline guards are a bad habit of mine
         _                 (assert (vector? members) "Members is not a vector!")
         _                 (assert (every? symbol? members) "Members may contain only symbols!")
@@ -159,8 +168,7 @@
                  (or (map? (val x#))
                      (nil? (val x#)))
                  (let [[_ {:keys ~members}] x#]
-                   (and ~@(:pre ?pre-map)
-                        ~@(:post ?pre-map))))))
+                   (and ~@(:pre ?pre-map))))))
          nil)))
 
 (defn read-tagged-val
