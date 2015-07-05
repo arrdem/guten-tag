@@ -159,7 +159,8 @@
                  (or (map? (val x#))
                      (nil? (val x#)))
                  (let [[_ {:keys ~members}] x#]
-                   (and ~@(:pre ?pre-map))))))
+                   (and ~@(:pre ?pre-map)
+                        ~@(:post ?pre-map))))))
          nil)))
 
 (defn read-tagged-val
