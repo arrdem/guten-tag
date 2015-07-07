@@ -171,12 +171,48 @@
                    (and ~@(:pre ?pre-map))))))
          nil)))
 
-(defn read-tagged-val
-  "Wrapper function around ->ATaggedVal which serves as the tagged value ctor."
-  [[tag val :as a]]
+(defn- general-read-tagged-val
+  "Wrapper function around ->ATaggedVal which serves as the tagged value ctor.
+
+  If the second argument is :do-eval, calls clojure.core/eval on its first
+  argument. Otherwise doesn't."
+  [[tag val :as a] eval?]
   {:pre [(vector? a)
          (keyword? tag)
          (map? val)
          (every? keyword? (keys val))]}
-  (let [[tag val] (eval a)]
+  (let [[tag val] (if (= eval? :do-eval)
+                    (eval a)
+                    a)]
     (->ATaggedVal tag val)))
+
+(defn read-tagged-val
+  "Reader function for tagged guten-tag literals. Doesn't evaluate anything it
+  reads, so it's safe for use clojure.edn/read(-string) on data from not so much
+  trusted sources.
+
+  Example:
+
+  (require '[guten-tag.core :as t]
+           '[clojure.edn :as edn])
+  ;; => nil
+  (edn/read-string
+    {:readers {'g/t t/read-tagged-val}}
+    \"#g/t [:geom.simple/oblong {:length 3 :width 4}]\")
+  ;; => #g/t [:geom.simple/oblong {:length 3, :width 4}]"
+  [a]
+  (general-read-tagged-val a :do-not-eval))
+
+(defn unsafe-read-tagged-val
+  "Reader function for tagged guten-tag literals. IMPORTANT: This function calls
+  eval on the data it reads. Use it only with data from trusted sources.
+
+  Example:
+
+  (require '[guten-tag.core :as t])
+  ;; => nil
+  (binding [*data-readers* (assoc *data-readers* 'g/t t/unsafe-read-tagged-val)]
+    (read-string \"#g/t [:geom.simple/square {:length 3 :area (* 3 3)}]\"))
+  ;; => #g/t [:geom.simple/square {:length 3, :area 9}]"
+  [a]
+  (general-read-tagged-val a :do-eval))
