@@ -106,6 +106,10 @@
   of the given tag type, and satisfies the `:pre` conditions in the tag
   constructor if any.
 
+  Note that deftag implicitly generates a declare for the T? predicate
+  so that it may be used as a precondition to the constructor, thus
+  allowing for recursive datatypes out of the box.
+
   Ex.
   (deftag test \"A demo variant\" [a b]
     {:pre [(number? a) (vector? b)]})
@@ -151,7 +155,8 @@
                                  ?pre-map
                                  (when ?docstring
                                    {:doc ?docstring}))]
-    `(do (defn ~(with-meta
+    `(do (declare ~(symbol (str (name vname) "?")))
+         (defn ~(with-meta
                   (symbol (str "->" (name vname)))
                   (select-keys ?pre-map [:private]))
            ~(str "Generated constructor for the " vname " type.")
