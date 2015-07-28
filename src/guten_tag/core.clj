@@ -111,8 +111,10 @@
   allowing for recursive datatypes out of the box.
 
   Ex.
-  (deftag test \"A demo variant\" [a b]
-    {:pre [(number? a) (vector? b)]})
+  (deftag test \"A demo variant\"
+    [a b]
+    {:pre [(number? a)
+           (vector? b)]})
   ;; => nil
   (->test 1 [1])
   ;; => #g/t [:user/test {:a 1 :b [1]}]
@@ -123,7 +125,7 @@
   (tag (->test 1 [1]))
   ;; => :user/test
   (val (->test 1 [1]))
-  ;; => {:a 1 b [1]}"
+  ;; => {:a 1 :b [1]}"
   {:arglists '([name doc-string? attr-map? members pre-map?])}
   [vname & args]
   (let [;; Parse direct args
