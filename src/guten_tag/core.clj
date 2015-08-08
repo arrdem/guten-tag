@@ -51,7 +51,11 @@
   (assocEx [_ sk sv]
     (ATaggedVal. t (.assocEx v sk sv)))
   (without [_ sk]
-    (ATaggedVal. t (.without v sk))))
+    (ATaggedVal. t (.without v sk)))
+
+  Object
+  (toString [self]
+    (pr-str self)))
 
 (def ^:dynamic *concise-printing*
   true)
