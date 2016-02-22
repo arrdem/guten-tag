@@ -167,7 +167,7 @@
                  (= ~kw-tag (tag x#))
                  (or (map? (val x#))
                      (nil? (val x#)))
-                 (let [[_ {:keys ~members}] x#]
+                 (let [[_# {:keys ~members}] x#]
                    (and ~@(:pre ?pre-map))))))
          nil)))
 
