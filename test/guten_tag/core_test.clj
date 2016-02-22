@@ -1,7 +1,9 @@
 (ns guten-tag.core-test
+  (:refer-clojure :exclude [val])
   (:require [clojure.test :refer :all]
             [guten-tag.core :refer :all]))
 
+(deftag a-tag [foo])
+
 (deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+  (is (a-tag? (->a-tag 3))))
