@@ -128,48 +128,48 @@
         [members args]    (take-when vector? nil args)
         [?pre-map args]   (take-when map? {} args)
 
-        _                 (when (:post ?pre-map)
-                            (->> (for [e (:post ?pre-map)]
-                                   (str "........ " e "\n"))
-                                 (list* "Warning: deftag ignores :post, the following forms are ignored:\n")
-                                 (apply str)
-                                 print))
+        _ (when (:post ?pre-map)
+            (->> (for [e (:post ?pre-map)]
+                   (str "........ " e "\n"))
+                 (list* "Warning: deftag ignores :post, the following forms are ignored:\n")
+                 (apply str)
+                 print))
 
-        _                 (dissoc ?pre-map :post)
+        _ (dissoc ?pre-map :post)
 
         ;; FIXME inline guards are a bad habit of mine
-        _                 (assert (vector? members) "Members is not a vector!")
-        _                 (assert (every? symbol? members) "Members may contain only symbols!")
+        _ (assert (vector? members) "Members is not a vector!")
+        _ (assert (every? symbol? members) "Members may contain only symbols!")
+        _ (assert (every? (complement namespace) members) "Members may not be namespaced!")
 
         ;; Build used datastructures
-        kw-members        (mapv (comp keyword name) members)
-        kw-tag            (keyword (or (namespace vname)
-                                       (name (ns-name *ns*)))
-                                   (name vname))
-        ?attr-map         (merge {}
-                                 ?attr-map
-                                 ?pre-map
-                                 (when ?docstring
-                                   {:doc ?docstring}))]
-    `(do (defn ~(with-meta
-                  (symbol (str "->" (name vname)))
-                  (select-keys ?pre-map [:private]))
-           ~(str "Generated constructor for the " vname " type.")
-           ~members
-           ~?pre-map
-           (->ATaggedVal ~kw-tag (hash-map ~@(interleave kw-members members))))
-         (defn ~(with-meta
-                  (symbol (str (name vname) "?"))
-                  (select-keys ?pre-map [:private]))
-           ~(str "Generated predicate for the " vname " type.")
-           ([x#]
-            (and (tagged? x#)
-                 (= ~kw-tag (tag x#))
-                 (or (map? (val x#))
-                     (nil? (val x#)))
-                 (let [[_# {:keys ~members}] x#]
-                   (and ~@(:pre ?pre-map))))))
-         nil)))
+        kw-members (mapv (comp keyword name) members)
+        kw-tag     (keyword (or (namespace vname)
+                                (name (ns-name *ns*)))
+                            (name vname))
+        ?attr-map  (merge {}
+                          ?attr-map
+                          ?pre-map
+                          (when ?docstring
+                            {:doc ?docstring}))]
+    `[(defn ~(with-meta
+               (symbol (str "->" (name vname)))
+               (select-keys ?pre-map [:private]))
+        ~(str "Generated constructor for the " vname " type.")
+        ~members
+        ~?pre-map
+        (->ATaggedVal ~kw-tag (hash-map ~@(interleave kw-members members))))
+      (defn ~(with-meta
+               (symbol (str (name vname) "?"))
+               (select-keys ?pre-map [:private]))
+        ~(str "Generated predicate for the " vname " type.")
+        ([x#]
+         (and (tagged? x#)
+              (= ~kw-tag (tag x#))
+              (or (map? (val x#))
+                  (nil? (val x#)))
+              (let [[_# {:keys ~members}] x#]
+                (and ~@(:pre ?pre-map))))))]))
 
 (defn- general-read-tagged-val
   "Wrapper function around ->ATaggedVal which serves as the tagged value ctor.
