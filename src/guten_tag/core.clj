@@ -216,3 +216,46 @@
   ;; => #g/t [:geom.simple/square {:length 3, :area 9}]"
   [a]
   (general-read-tagged-val a :do-eval))
+
+
+
+(defmacro defenum
+  "Generates a tagged value predicate T? and a number of defs corresponding to the symbolic values
+  of the enumeration type T.
+
+  Ex.
+  (defenum foo [bar baz qux])
+  ;; => nil
+  "
+  {:arglists '([name doc-string? attr-map? members])}
+  [ename & args]
+  (let [[?docstring args] (take-when string? "" args)
+        [?attr-map args]  (take-when map? {} args)
+        [members args]    (take-when vector? nil args)
+
+        ;; FIXME inline guards are a bad habit of mine
+        _ (assert (vector? members) "Members is not a vector!")
+        _ (assert (every? symbol? members) "Members may contain only symbols!")
+        _ (assert (every? (complement namespace) members) "Members may not be namespaced!")
+
+        ;; Build used datastructures
+        kw-tag    (keyword (or (namespace ename)
+                               (name (ns-name *ns*)))
+                           (name ename))
+        ?attr-map (merge {}
+                         ?attr-map
+                         (when ?docstring
+                           {:doc ?docstring}))
+        pred      (symbol (str (name ename) "?"))]
+    `[~@(mapcat (fn [member]
+                  (let [kw (keyword (name member))]
+                    `[(def ~member (->ATaggedVal ~kw-tag ~kw))
+                      (defn ~(symbol (str (name member) "?")) [x#]
+                        (and (tagged? x#)
+                             (= ~kw-tag (tag x#))
+                             (= ~kw (val x#))))]))
+                members)
+      (defn ~pred [x#]
+        (and (tagged? x#)
+             (= ~kw-tag (tag x#))
+             (~(set (map (comp keyword name) members)) (val x#))))]))
