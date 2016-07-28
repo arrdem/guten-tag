@@ -236,7 +236,6 @@
         ;; FIXME inline guards are a bad habit of mine
         _ (assert (vector? members) "Members is not a vector!")
         _ (assert (every? symbol? members) "Members may contain only symbols!")
-        _ (assert (every? (complement namespace) members) "Members may not be namespaced!")
 
         ;; Build used datastructures
         kw-tag    (keyword (or (namespace ename)
@@ -246,16 +245,18 @@
                          ?attr-map
                          (when ?docstring
                            {:doc ?docstring}))
-        pred      (symbol (str (name ename) "?"))]
+        pred      (symbol (str (name ename) "?"))
+        members   (map #(keyword (namespace %) (name %)) members)]
     `[~@(mapcat (fn [member]
-                  (let [kw (keyword (name member))]
-                    `[(def ~member (->ATaggedVal ~kw-tag ~kw))
-                      (defn ~(symbol (str (name member) "?")) [x#]
-                        (and (tagged? x#)
-                             (= ~kw-tag (tag x#))
-                             (= ~kw (val x#))))]))
+                  `[(def ~(symbol (name member)) (->ATaggedVal ~kw-tag ~member))
+                    (defn ~(symbol (str (name member) "?")) [x#]
+                      (boolean
+                       (and (tagged? x#)
+                            (= ~kw-tag (tag x#))
+                            (= ~member (val x#)))))])
                 members)
       (defn ~pred [x#]
-        (and (tagged? x#)
-             (= ~kw-tag (tag x#))
-             (~(set (map (comp keyword name) members)) (val x#))))]))
+        (boolean
+         (and (tagged? x#)
+              (= ~kw-tag (tag x#))
+              (~(set (map (comp keyword name) members)) (val x#)))))]))
