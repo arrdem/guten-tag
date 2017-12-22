@@ -1,5 +1,6 @@
 (ns guten-tag.core
-  (:refer-clojure :exclude [val]))
+  (:refer-clojure :exclude [val])
+  )
 
 (defprotocol ITaggedVal
   (-tag [_])
@@ -34,6 +35,11 @@
     (= (seq this) obj))
   (seq [self]
     (cons t (cons v nil)))
+
+  java.lang.Iterable
+  (iterator [this]
+    (clojure.lang.SeqIterator.
+     (seq this)))
 
   clojure.lang.Associative
   (entryAt [self key]
