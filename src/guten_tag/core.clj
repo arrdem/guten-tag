@@ -1,6 +1,5 @@
 (ns guten-tag.core
-  (:refer-clojure :exclude [val])
-  )
+  (:refer-clojure :exclude [val]))
 
 (defprotocol ITaggedVal
   (-tag [_])
